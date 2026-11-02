@@ -1,0 +1,11 @@
+{
+  "name": "hnmu/minishop-mvc-demo",
+  "description": "MiniShop MVC demo for Web Programming course",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "require": {}
+}
