@@ -40,4 +40,29 @@ final class CategoryRepository
         $stmt = $this->pdo->prepare('DELETE FROM categories WHERE id = :id');
         $stmt->execute(['id' => $id]);
     }
+
+    /**
+     * Dùng cho JSON endpoint: tìm theo tên, lọc theo trạng thái, kèm số sản phẩm.
+     */
+    public function search(string $keyword = '', string $status = ''): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT c.id, c.name, c.status, COUNT(p.id) AS product_count
+             FROM categories c
+             LEFT JOIN products p ON p.category_id = c.id
+             WHERE (:keyword_empty = 1 OR c.name LIKE :keyword)
+               AND (:status_empty = 1 OR c.status = :status)
+             GROUP BY c.id, c.name, c.status
+             ORDER BY c.id DESC
+             LIMIT 50'
+        );
+
+        $stmt->bindValue(':keyword_empty', $keyword === '' ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
+        $stmt->bindValue(':status_empty', $status === '' ? 1 : 0, PDO::PARAM_INT);
+        $stmt->bindValue(':status', $status, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
 }

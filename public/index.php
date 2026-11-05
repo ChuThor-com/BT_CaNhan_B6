@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 use App\Controller\AdminProductController;
 use App\Controller\AdminUserController;
+use App\Controller\ApiCategoryController;
 use App\Controller\ApiProductController;
 use App\Controller\AuthController;
 use App\Controller\OrderController;
@@ -38,6 +39,7 @@ $orderController = new OrderController($orderRepository);
 $apiProductController = new ApiProductController($productRepository);
 $categoryRepository = new CategoryRepository($pdo);
 $adminCategoryController = new AdminCategoryController($categoryRepository);
+$apiCategoryController = new ApiCategoryController($categoryRepository);
 
 $route = $_GET['route'] ?? 'products';
 
@@ -55,6 +57,7 @@ $routes = [
         'my-orders' => [$orderController, 'mine'],
         'my-orders/show' => [$orderController, 'show'],
         'api/products' => [$apiProductController, 'search'],
+        'api/categories' => [$apiCategoryController, 'search'],
         'admin/categories' => [$adminCategoryController, 'index'],
 'admin/categories/create' => [$adminCategoryController, 'createForm'],
 'admin/categories/edit' => [$adminCategoryController, 'editForm'],

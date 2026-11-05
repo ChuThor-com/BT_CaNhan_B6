@@ -4,6 +4,31 @@
         <a class="button" href="<?= e(url('admin/categories/create')) ?>">+ Thêm danh mục</a>
     </div>
 
+    <div class="card live-panel" id="cat-live">
+        <h2>Tìm nhanh (Fetch API)</h2>
+        <p class="muted">Gọi <code>?route=api/categories</code> bằng fetch(), không tải lại trang.</p>
+
+        <div class="live-controls">
+            <label>
+                Tên danh mục
+                <input id="cat-q" type="search" maxlength="100" placeholder="Nhập tên danh mục" autocomplete="off">
+            </label>
+            <label>
+                Trạng thái
+                <select id="cat-status">
+                    <option value="">-- Tất cả --</option>
+                    <option value="active">active</option>
+                    <option value="inactive">inactive</option>
+                </select>
+            </label>
+        </div>
+
+        <div id="cat-msg" class="live-msg muted" role="status" aria-live="polite"></div>
+        <button type="button" id="cat-retry" class="secondary-btn" hidden>Thử lại</button>
+        <div id="cat-results" aria-busy="false"></div>
+    </div>
+
+    <h2>Danh sách đầy đủ</h2>
     <table>
         <thead>
         <tr>
@@ -32,3 +57,4 @@
         </tbody>
     </table>
 </section>
+<script src="assets/category-live.js" defer></script>

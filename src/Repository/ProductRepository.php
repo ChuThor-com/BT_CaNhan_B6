@@ -49,12 +49,15 @@ final class ProductRepository
              JOIN categories c ON c.id = p.category_id
              WHERE p.status = "active"
                AND c.status = "active"
-               AND (p.name LIKE :keyword OR p.code LIKE :keyword)
+               AND (p.name LIKE :keyword_name OR p.code LIKE :keyword_code)
              ORDER BY p.name
              LIMIT 10'
         );
 
-        $stmt->execute(['keyword' => '%' . $keyword . '%']);
+        $stmt->execute([
+            'keyword_name' => '%' . $keyword . '%',
+            'keyword_code' => '%' . $keyword . '%',
+        ]);
         return $stmt->fetchAll();
     }
 

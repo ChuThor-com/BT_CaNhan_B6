@@ -253,3 +253,26 @@ Bài 8:
 Browser → Fetch → ApiProductController → ProductRepository → MySQL → JSON
 ```
 
+
+---
+
+# Phần cá nhân – Bài 7 & Bài 8 (module Danh mục)
+
+## Bài 7 – Đăng nhập/đăng xuất, password_hash, test truy cập khi chưa đăng nhập
+
+- `AuthController::login`: chuẩn hóa email, kiểm tra rỗng, luôn gọi `password_verify()` (kể cả khi email không tồn tại, dùng hash giả) và dùng một thông báo lỗi chung; `password_needs_rehash()` để băm lại khi cần; `session_regenerate_id(true)` trong `Auth::login()`.
+- Quay lại đúng URL đang vào sau khi đăng nhập: `Auth::requireLogin()` lưu URL (chỉ GET), `Auth::pullIntendedUrl()` chỉ chấp nhận đường dẫn nội bộ (chống open redirect).
+- `logout`: yêu cầu đăng nhập + CSRF, hủy session, cấp session mới.
+- Tài khoản mẫu trong `database/minishop.sql` lưu bằng `password_hash()` (bcrypt `$2y$`). Kiểm tra: `php tests/seed_password_test.php`. Tạo hash mới: `php tools/hash_password.php "MậtKhẩu"`.
+- Test case truy cập URL khi chưa đăng nhập: `docs/TEST_CASES_BAI7.md`; chạy tự động: `php tests/unauth_access_test.php http://localhost/minishop_mvc_demo/public/index.php`.
+
+## Bài 8 – JSON endpoint + Fetch
+
+- Endpoint mới: `GET ?route=api/categories&q=...&status=active|inactive` (`ApiCategoryController`, `CategoryRepository::search`). Chỉ admin; lỗi trả JSON 401/403/422/500.
+- Giao diện: panel "Tìm nhanh (Fetch API)" ở `?route=admin/categories` (`public/assets/category-live.js`) có loading, hiển thị lỗi, nút Thử lại, debounce 300 ms, hủy request cũ bằng `AbortController`, dựng DOM bằng `textContent`.
+- Checklist kiểm thử: `docs/CHECKLIST_BAI8.md`.
+
+## Sửa lỗi kèm theo
+
+- `ProductRepository::searchActive` dùng lặp tham số `:keyword` (không hợp lệ khi `ATTR_EMULATE_PREPARES = false`) → tách thành `:keyword_name`, `:keyword_code`.
+- `AdminCategoryController`: kiểm tra `status` hợp lệ, bắt lỗi trùng tên và lỗi khóa ngoại khi xóa danh mục đang có sản phẩm (hiện thông báo thay vì lỗi 500).

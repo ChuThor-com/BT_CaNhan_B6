@@ -35,9 +35,16 @@ final class AdminCategoryController extends Controller
         $name = trim($_POST['name'] ?? '');
         $status = $_POST['status'] ?? 'active';
 
-        if ($name !== '') {
+        if ($name === '' || !in_array($status, ['active', 'inactive'], true)) {
+            flash('error', 'Tên hoặc trạng thái danh mục không hợp lệ.');
+            $this->redirect('admin/categories/create');
+        }
+
+        try {
             $this->categories->create($name, $status);
             flash('success', 'Đã thêm danh mục.');
+        } catch (\PDOException $e) {
+            flash('error', 'Không thể thêm danh mục (tên có thể đã tồn tại).');
         }
         $this->redirect('admin/categories');
     }
@@ -63,9 +70,16 @@ final class AdminCategoryController extends Controller
         $name = trim($_POST['name'] ?? '');
         $status = $_POST['status'] ?? 'active';
 
-        if ($id && $name !== '') {
+        if (!$id || $name === '' || !in_array($status, ['active', 'inactive'], true)) {
+            flash('error', 'Dữ liệu cập nhật không hợp lệ.');
+            $this->redirect('admin/categories');
+        }
+
+        try {
             $this->categories->update($id, $name, $status);
             flash('success', 'Đã cập nhật danh mục.');
+        } catch (\PDOException $e) {
+            flash('error', 'Không thể cập nhật danh mục (tên có thể đã tồn tại).');
         }
         $this->redirect('admin/categories');
     }
@@ -77,9 +91,13 @@ final class AdminCategoryController extends Controller
         
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
         if ($id) {
-            // (Lưu ý: Nếu danh mục đang có sản phẩm, SQL sẽ báo lỗi khóa ngoại. Bạn có thể bắt lỗi ở đây)
-            $this->categories->delete($id);
-            flash('success', 'Đã xóa danh mục.');
+            try {
+                $this->categories->delete($id);
+                flash('success', 'Đã xóa danh mục.');
+            } catch (\PDOException $e) {
+                // Khóa ngoại products.category_id (ON DELETE RESTRICT) chặn xóa danh mục đang có sản phẩm.
+                flash('error', 'Không thể xóa: danh mục đang có sản phẩm.');
+            }
         }
         $this->redirect('admin/categories');
     }

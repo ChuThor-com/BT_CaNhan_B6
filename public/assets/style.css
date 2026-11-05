@@ -138,7 +138,60 @@ button,
     align-items: center;
 }
 
+/* Bài 8: panel tìm nhanh bằng Fetch */
+.live-panel {
+    margin: 18px 0 26px;
+}
+
+.live-controls {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+}
+
+.live-msg {
+    min-height: 1.4em;
+    margin: 6px 0;
+}
+
+.live-msg.loading::before {
+    content: "";
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    border: 2px solid #cbd5e1;
+    border-top-color: #1f6aa5;
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: spin 0.7s linear infinite;
+}
+
+.live-msg.error {
+    color: #b42318;
+    background: #fff0f0;
+    padding: 8px 10px;
+    border-radius: 5px;
+}
+
+.secondary-btn {
+    background: #6b7280;
+    margin-bottom: 8px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 @media (max-width: 760px) {
+    .live-controls {
+        grid-template-columns: 1fr;
+    }
+
     .filters {
         grid-template-columns: 1fr;
     }

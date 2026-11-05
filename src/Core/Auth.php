@@ -57,6 +57,11 @@ final class Auth
     public static function requireLogin(): void
     {
         if (!self::check()) {
+            // Nhớ URL (chỉ GET) để đăng nhập xong quay lại đúng trang đang vào.
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+                $_SESSION['intended'] = $_SERVER['REQUEST_URI'] ?? null;
+            }
+
             flash('error', 'Vui lòng đăng nhập.');
             header('Location: ' . url('login'));
             exit;
@@ -71,6 +76,45 @@ final class Auth
             http_response_code(403);
             exit('403 - Bạn không có quyền truy cập chức năng này.');
         }
+    }
+
+    /**
+     * Lấy (và xóa) URL nội bộ đã lưu trước khi bị chuyển sang trang đăng nhập.
+     * Chỉ chấp nhận đường dẫn tương đối "/..." để tránh open redirect.
+     */
+    public static function pullIntendedUrl(): ?string
+    {
+        $url = $_SESSION['intended'] ?? null;
+        unset($_SESSION['intended']);
+
+        if (!is_string($url) || $url === '' || $url[0] !== '/' || str_starts_with($url, '//')
+            || str_contains($url, "\r") || str_contains($url, "\n") || str_contains($url, '\\')) {
+            return null;
+        }
+
+        return $url;
+    }
+
+    /**
+     * Dành cho JSON endpoint: không redirect sang HTML mà trả 401/403 dạng JSON.
+     */
+    public static function requireRoleJson(string ...$roles): void
+    {
+        if (!self::check()) {
+            self::jsonError(401, 'Bạn chưa đăng nhập hoặc phiên đã hết hạn.');
+        }
+
+        if (!in_array(self::role(), $roles, true)) {
+            self::jsonError(403, 'Bạn không có quyền truy cập chức năng này.');
+        }
+    }
+
+    private static function jsonError(int $status, string $message): never
+    {
+        http_response_code($status);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'message' => $message], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     public static function csrfToken(): string
